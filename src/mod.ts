@@ -195,13 +195,13 @@ class Mod implements IPostAkiLoadMod, IPostDBLoadMod, IPreAkiLoadMod {
         //clone a case
         if (config.case_type === "container"){
             item = structuredClone(tables.templates.items["5d235bb686f77443f4331278"]);
-            item._props.IsAlwaysAvailableForInsurance = false;
+            item._props.IsAlwaysAvailableForInsurance = true;
             item._props.DiscardLimit = -1;
         }
 
         if (config.case_type === "slots"){
             item = structuredClone(tables.templates.items["5a9d6d00a2750c5c985b5305"]);
-            item._props.IsAlwaysAvailableForInsurance = false;
+            item._props.IsAlwaysAvailableForInsurance = true;
             item._props.DiscardLimit = -1;
             item._props.ItemSound = config.sound;
         }
