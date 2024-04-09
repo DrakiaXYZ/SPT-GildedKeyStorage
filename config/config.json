@@ -98,6 +98,7 @@
         "item_description": "Secure and compact storage for your Golden Keychains and Golden Keycard Holder, as well as some extra space for loose keys.",
         "flea_price": 3000000,
         "flea_banned": true,
+        "insurance_enabled": true,
 
         "trader": "therapist",
         "trader_loyalty_level": 2,
@@ -160,6 +161,7 @@
         "item_description": "One of 3 gold keychains. This one contains all Ground Zero, Factory, Woods, Customs, Interchange, and Misc keys.",
         "flea_price": 1000000,
         "flea_banned": true,
+        "insurance_enabled": true,
         "sound": "keys",
 
         "trader": "therapist",
@@ -268,6 +270,7 @@
         "item_description": "One of 3 gold keychains. This one contains all Lighthouse and Shoreline keys.",
         "flea_price": 1000000,
         "flea_banned": true,
+        "insurance_enabled": true,
         "sound": "keys",
 
         "trader": "ragman",
@@ -373,6 +376,7 @@
         "item_description": "One of 3 gold keychains. This one contains all Streets, Reserve, and Labs keys.",
         "flea_price": 1000000,
         "flea_banned": true,
+        "insurance_enabled": true,
         "sound": "keys",
 
         "trader": "skier",
@@ -460,6 +464,7 @@
         "item_description": "A shiny keycard case that can hold every keycard in the game, including a few Labs Access cards.",
         "flea_price": 1000000,
         "flea_banned": true,
+        "insurance_enabled": true,
         "sound": "container_plastic",
 
         "trader": "peacekeeper",
