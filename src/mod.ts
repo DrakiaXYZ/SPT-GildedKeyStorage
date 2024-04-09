@@ -135,7 +135,7 @@ class Mod implements IPostAkiLoadMod, IPostDBLoadMod, IPreAkiLoadMod {
                     itemProps.Weight = 0.0;
                 }
 
-                itemProps.InsuranceDisabled = !config.key_insurance_enabled
+                itemProps.InsuranceDisabled = !config.key_insurance_enabled;
 
                 // If keys are to be set to no limit, and we're either not using the finite keys list, or this key doesn't exist
                 // in it, set the key max usage to 0 (infinite)
