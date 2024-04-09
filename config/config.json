@@ -1,4 +1,5 @@
 {
+    "key_insurance_enabled": true,
     "weightless_keys": true,
     "no_key_use_limit": true,
     "keys_are_discardable": true,
