@@ -543,12 +543,13 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
             // Skip cases that aren't set slots
             const caseConfig = config[configName];
             if (caseConfig.case_type !== "slots") continue;
+            const templateId = this.newIdMap[caseConfig.id];
 
             // Get the template for the case
-            const caseTemplate = dbItems[caseConfig.id];
+            const caseTemplate = dbItems[templateId];
 
             // Try to find the case in the user's profile
-            const inventoryCases = pmcProfile.Inventory.items.filter(x => x._tpl === caseConfig.id);
+            const inventoryCases = pmcProfile.Inventory.items.filter(x => x._tpl === templateId);
 
             for (const inventoryCase of inventoryCases)
             {
