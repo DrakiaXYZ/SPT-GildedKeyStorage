@@ -174,7 +174,7 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
                     {
                         // Exclude items with a base class of KEY. Have to check that it's an "Item" type first because isOfBaseClass only accepts Items
                         filter.ExcludedFilter = filter.ExcludedFilter.filter(
-                            itemTpl => this.itemHelper.getItem(itemTpl)[1]._type !== "Item" || !this.itemHelper.isOfBaseclass(itemTpl, BaseClasses.KEY)
+                            itemTpl => this.itemHelper.getItem(itemTpl)[1]?._type !== "Item" || !this.itemHelper.isOfBaseclass(itemTpl, BaseClasses.KEY)
                         );
                     }
                 }
