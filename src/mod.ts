@@ -166,15 +166,17 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
             }
 
             // Remove keys from secure container exclude filter
-            if (config.all_keys_in_secure && this.itemHelper.isOfBaseclass(item._id, BaseClasses.MOB_CONTAINER))
-            {
-                const filter = itemProps?.Grids[0]?._props?.filters[0];
-                if (filter)
-                {
-                    // Exclude items with a base class of KEY. Have to check that it's an "Item" type first because isOfBaseClass only accepts Items
-                    filter.ExcludedFilter = filter.ExcludedFilter.filter(
-                        itemTpl => this.itemHelper.getItem(itemTpl)[1]._type !== "Item" || !this.itemHelper.isOfBaseclass(itemTpl, BaseClasses.KEY)
-                    );
+            if (config.all_keys_in_secure && this.itemHelper.isOfBaseclass(item._id, BaseClasses.MOB_CONTAINER) && itemProps?.Grids) {
+                // Theta container has multiple grids, so we need to loop through all grids
+                for (const grid of itemProps.Grids) {
+                    const filter = grid?._props?.filters[0];
+                    if (filter)
+                    {
+                        // Exclude items with a base class of KEY. Have to check that it's an "Item" type first because isOfBaseClass only accepts Items
+                        filter.ExcludedFilter = filter.ExcludedFilter.filter(
+                            itemTpl => this.itemHelper.getItem(itemTpl)[1]._type !== "Item" || !this.itemHelper.isOfBaseclass(itemTpl, BaseClasses.KEY)
+                        );
+                    }
                 }
             }
         }
@@ -194,8 +196,11 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
                 item._parent === BaseClasses.VEST ||
                 (this.itemHelper.isOfBaseclass(item._id, BaseClasses.MOB_CONTAINER) && item._id !== "5c0a794586f77461c458f892")
             ) {
-                if (item._props.Grids[0]._props.filters[0] === undefined){
-                    item._props.Grids[0]._props.filters = structuredClone(compatFiltersElement);
+                for (const grid of item._props.Grids)
+                {
+                    if (grid._props.filters[0] === undefined) {
+                        grid._props.filters = structuredClone(compatFiltersElement);
+                    }
                 }
             }
         }
@@ -365,12 +370,12 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
 
         //exclude custom case in all items of caseToApplyTo parent
         if (includeOrExclude === "exclude"){
-            for (const gridKey in currentItem._props.Grids){
+            for (const grid of currentItem._props.Grids) {
                 if (currentItem._parent === caseParent && currentItem._id !== "5c0a794586f77461c458f892"){
-                    if (currentItem._props.Grids[gridKey]._props.filters[0].ExcludedFilter === undefined){
-                        currentItem._props.Grids[gridKey]._props.filters[0].ExcludedFilter = [customItemID];
+                    if (grid._props.filters[0].ExcludedFilter === undefined){
+                        grid._props.filters[0].ExcludedFilter = [customItemID];
                     } else {                 
-                        currentItem._props.Grids[gridKey]._props.filters[0].ExcludedFilter.push(customItemID)
+                        grid._props.filters[0].ExcludedFilter.push(customItemID)
                     }
                 }
             }
@@ -379,10 +384,12 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         //include custom case in all items of caseToApplyTo parent
         if (includeOrExclude === "include"){
             if (currentItem._parent === caseParent && currentItem._id !== "5c0a794586f77461c458f892"){
-                if (currentItem._props.Grids[0]._props.filters[0].Filter === undefined){
-                    currentItem._props.Grids[0]._props.filters[0].Filter = [customItemID];
-                } else {
-                    currentItem._props.Grids[0]._props.filters[0].Filter.push(customItemID)
+                for (const grid of currentItem._props.Grids) {
+                    if (grid._props.filters[0].Filter === undefined){
+                        grid._props.filters[0].Filter = [customItemID];
+                    } else {
+                        grid._props.filters[0].Filter.push(customItemID)
+                    }
                 }
             }
         }
@@ -392,19 +399,23 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
     
         //exclude custom case in specific item of caseToApplyTo id
         if (includeOrExclude === "exclude"){
-            if (currentItem._props.Grids[0]._props.filters[0].ExcludedFilter === undefined){
-                currentItem._props.Grids[0]._props.filters[0].ExcludedFilter = [customItemID];
-            } else {
-                currentItem._props.Grids[0]._props.filters[0].ExcludedFilter.push(customItemID)
+            for (const grid of currentItem._props.Grids) {
+                if (grid._props.filters[0].ExcludedFilter === undefined){
+                    grid._props.filters[0].ExcludedFilter = [customItemID];
+                } else {
+                    grid._props.filters[0].ExcludedFilter.push(customItemID)
+                }
             }
         }
 
         //include custom case in specific item of caseToApplyTo id
         if (includeOrExclude === "include"){
-            if (currentItem._props.Grids[0]._props.filters[0].Filter === undefined){
-                currentItem._props.Grids[0]._props.filters[0].Filter = [customItemID];
-            } else {
-                currentItem._props.Grids[0]._props.filters[0].Filter.push(customItemID)
+            for (const grid of currentItem._props.Grids) {
+                if (grid._props.filters[0].Filter === undefined){
+                    grid._props.filters[0].Filter = [customItemID];
+                } else {
+                    grid._props.filters[0].Filter.push(customItemID)
+                }
             }
         }      
     }
