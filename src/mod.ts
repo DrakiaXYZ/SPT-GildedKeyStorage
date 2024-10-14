@@ -21,6 +21,7 @@ import { Debug } from "./debug";
 import * as config from "../config/config.json";
 import type { ITrader } from "@spt/models/eft/common/tables/ITrader";
 import type { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
+import { ItemTpl } from "@spt/models/enums/ItemTpl";
 
 class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
     caseConfigNames = [
@@ -276,9 +277,6 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         );
 
         this.pushToTrader(config, templateId, tables.traders);
-
-        //log success!
-        this.logger.log(`[${this.modName}] : ${config.item_name} loaded! Hooray!`, LogTextColor.GREEN);
     }
 
     pushToTrader(config, itemID:string, dbTraders: Record<string, ITrader>){
@@ -568,7 +566,25 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
 
                 for (const child of caseChildren)
                 {
-                    const newSlot = caseTemplate._props?.Slots?.find(x => x._props?.filters[0]?.Filter[0] === child._tpl);
+                    // Skip if the current slot filter can hold the given item, and there aren't multiple items in it
+                    const currentSlot = caseTemplate._props?.Slots?.find(x => x._name === child.slotId);
+                    if (currentSlot._props?.filters[0]?.Filter[0] === child._tpl &&
+                        // A release of GKS went out that may have stacked keycards, so check for any stacked items in one slot
+                        caseChildren.filter(x => x.slotId === currentSlot._name).length === 1
+                    )
+                    {
+                        continue;
+                    }
+
+                    // Find a new slot, if this is a labs access item, find the first empty compatible slot
+                    const newSlot = caseTemplate._props?.Slots?.find(x => 
+                        x._props?.filters[0]?.Filter[0] === child._tpl &&
+                        // A release of GKS went out that may have stacked keycards, try to fix that
+                        (
+                            child._tpl !== ItemTpl.KEYCARD_TERRAGROUP_LABS_ACCESS || 
+                            !caseChildren.find(y => y.slotId === x._name)
+                        )
+                    );
 
                     // If we couldn't find a new slot for this key, something has gone horribly wrong, restore the inventory and exit
                     if (!newSlot)
