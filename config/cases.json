@@ -45,7 +45,7 @@
         },
 
         "included_filter": ["543be5e94bdc2df1348b4568"],
-        "excluded_filter": [""],
+        "excluded_filter": [],
 
         "cell_to_apply_filters_to": 1,
         "unique_included_filter": [
@@ -54,12 +54,12 @@
             "Golden_Keychain3",
             "Golden_Keycard_Case"
         ],
-        "unique_excluded_filter": [""],
+        "unique_excluded_filter": [],
 
         "allow_in_secure_containers": true,
         "allow_in_backpacks": true,
-        "case_allowed_in": [""],
-        "case_disallowed_in": [""]
+        "case_allowed_in": [],
+        "case_disallowed_in": []
     },
 
     "Golden Keychain Mk. I": {
@@ -101,8 +101,8 @@
 
         "allow_in_secure_containers": true,
         "allow_in_backpacks": true,
-        "case_allowed_in": [""],
-        "case_disallowed_in": [""],
+        "case_allowed_in": [],
+        "case_disallowed_in": [],
 
 
         "slot_ids": [
@@ -213,8 +213,8 @@
 
         "allow_in_secure_containers": true,
         "allow_in_backpacks": true,
-        "case_allowed_in": [""],
-        "case_disallowed_in": [""],
+        "case_allowed_in": [],
+        "case_disallowed_in": [],
 
 
         "slot_ids": [
@@ -322,8 +322,8 @@
 
         "allow_in_secure_containers": true,
         "allow_in_backpacks": true,
-        "case_allowed_in": [""],
-        "case_disallowed_in": [""],
+        "case_allowed_in": [],
+        "case_disallowed_in": [],
 
         "slot_ids": [
             "6398fd8ad3de3849057f5128",            "63a39667c9b3aa4b61683e98",
@@ -410,8 +410,8 @@
 
         "allow_in_secure_containers": true,
         "allow_in_backpacks": true,
-        "case_allowed_in": [""],
-        "case_disallowed_in": [""],
+        "case_allowed_in": [],
+        "case_disallowed_in": [],
 
         "slot_ids": [    
             "5c1d0f4986f7744bb01837fa",
