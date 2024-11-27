@@ -1,0 +1,29 @@
+{
+    "key_insurance_enabled": true,
+    "weightless_keys": true,
+    "no_key_use_limit": true,
+    "keys_are_discardable": true,
+    "all_keys_in_secure": true,
+    "use_finite_keys_list": false,
+    "finite_keys_list":[
+      "5c94bbff86f7747ee735c08f",
+      "62987dfc402c7f69bf010923",
+      "5780cf7f2459777de4559322",
+      "5d80c60f86f77440373c4ece",
+      "5d80c62a86f7744036212b3f",
+      "5ede7a8229445733cb4c18e2",
+      "63a3a93f8a56922e82001f5d",
+      "64ccc25f95763a1ae376e447",
+      "64d4b23dc1b37504b41ac2b6",
+      "664d3ddfdda2e85aca370d75",
+      "664d3dd590294949fe2d81b7",
+      "664d3de85f2355673b09aed5",
+      "664d3db6db5dea2bad286955"
+    ],
+
+    "debug": {
+        "log_missing_keys": false,
+        "give_profile_all_keys": false,
+        "force_remove_debug_items_on_start": false
+    }
+}

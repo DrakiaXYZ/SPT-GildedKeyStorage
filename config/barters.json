@@ -1,0 +1,73 @@
+{
+    "Keytool Barter for Keychain": {
+        "id": "62a09d3bcf4a99369e262447",
+        "trader": "mechanic",
+        "trader_loyalty_level": 1,
+        "unlimited_stock": true,
+        "stock_amount": 3,
+
+        "barter": [
+            {
+                "count": 1,
+                "_tpl": "59fafd4b86f7745ca07e1232"
+            }
+        ]
+    },
+
+    "Prokill Barter for Keychain": {
+        "id": "62a09d3bcf4a99369e262447",
+        "trader": "jaeger",
+        "trader_loyalty_level": 1,
+        "unlimited_stock": true,
+        "stock_amount": 3,
+
+        "barter": [
+            {
+                "count": 1,
+                "_tpl": "5c1267ee86f77416ec610f72"
+            }
+        ]
+    },
+
+    "Chains Barter for Keychain": {
+        "id": "62a09d3bcf4a99369e262447",
+        "trader": "ragman",
+        "trader_loyalty_level": 1,
+        "unlimited_stock": true,
+        "stock_amount": 3,
+
+        "barter": [
+            {
+                "count": 3,
+                "_tpl": "573474f924597738002c6174"
+            },
+            {
+                "count": 1,
+                "_tpl": "5734758f24597738025ee253"
+            }
+        ]
+    },
+
+    "Barter for Cottage Key": {
+        "id": "5a0eb6ac86f7743124037a28",
+        "trader": "prapor",
+        "trader_loyalty_level": 2,
+        "unlimited_stock": true,
+        "stock_amount": 1,
+
+        "barter": [
+            {
+                "count": 1,
+                "_tpl": "5c12613b86f7743bbe2c3f76"
+            },
+            {
+                "count": 1,
+                "_tpl": "590c37d286f77443be3d7827"
+            },
+            {
+                "count": 1,
+                "_tpl": "590c621186f774138d11ea29"
+            }
+        ]
+    }
+}

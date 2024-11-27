@@ -4,7 +4,6 @@ import type { DependencyContainer } from "tsyringe";
 import type { ProfileHelper } from "@spt/helpers/ProfileHelper";
 import type { StaticRouterModService } from "@spt/services/mod/staticRouter/StaticRouterModService";
 import type { SaveServer } from "@spt/servers/SaveServer";
-import type { IPostSptLoadMod } from "@spt/models/external/IPostSptLoadMod";
 import type { IPostDBLoadMod } from "@spt/models/external/IPostDBLoadMod";
 import type { IPreSptLoadMod } from "@spt/models/external/IPreSptLoadMod";
 import type { ItemHelper } from "@spt/helpers/ItemHelper";
@@ -15,23 +14,20 @@ import { BaseClasses } from "@spt/models/enums/BaseClasses";
 import { LogTextColor } from "@spt/models/spt/logging/LogTextColor";
 import type { GameController } from "@spt/controllers/GameController";
 import type { IEmptyRequestData } from "@spt/models/eft/common/IEmptyRequestData";
-//import { LogBackgroundColor } from "@spt/models/spt/logging/LogBackgroundColor";
+import { VFS } from "@spt/utils/VFS";
 import { Debug } from "./debug";
 
-import * as config from "../config/config.json";
+import barters from "../config/barters.json";
+import cases from "../config/cases.json";
+
 import type { ITrader } from "@spt/models/eft/common/tables/ITrader";
 import type { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
 import { ItemTpl } from "@spt/models/enums/ItemTpl";
+import path from "path";
+import { copyFileSync, existsSync } from "fs";
+import JSON5 from "json5";
 
-class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
-    caseConfigNames = [
-        "Golden Key Pouch",
-        "Golden Keychain Mk. I",
-        "Golden Keychain Mk. II",
-        "Golden Keychain Mk. III",
-        "Golden Keycard Case"
-    ];
-
+class Mod implements IPostDBLoadMod, IPreSptLoadMod {
     newIdMap = {
         Golden_Key_Pouch: "661cb36922c9e10dc2d9514b",
         Golden_Keycard_Case: "661cb36f5441dc730e28bcb0",
@@ -39,29 +35,32 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         Golden_Keychain2: "661cb3743bf00d3d145518b3",
         Golden_Keychain3: "661cb376b16226f648eb0cdc"
     };
-
+    
     logger: ILogger
     modName: string
     modVersion: string
     container: DependencyContainer;
     profileHelper: ProfileHelper;
     itemHelper: ItemHelper;
+    vfs: VFS;
+    config: any;
 
     constructor() {
         this.modName = "Gilded Key Storage";
     }
 
-    public postSptLoad(container: DependencyContainer): void {
-        this.container = container;
-    }
-
-
     public preSptLoad(container: DependencyContainer): void {
+        this.container = container;
+
         const staticRouterModService = container.resolve<StaticRouterModService>("StaticRouterModService")
         const saveServer = container.resolve<SaveServer>("SaveServer")
         const logger = container.resolve<ILogger>("WinstonLogger")
         this.profileHelper = container.resolve<ProfileHelper>("ProfileHelper");
         this.itemHelper = container.resolve<ItemHelper>("ItemHelper");
+        this.vfs = container.resolve<VFS>("VFS");
+
+        // Load our config
+        this.loadConfig();
 
         // On game start, see if we need to fix issues from previous versions
         // Note: We do this as a method replacement so we can run _before_ SPT's gameStart
@@ -81,7 +80,7 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         });
 
         // Setup debugging if enabled
-        const debugUtil = new Debug()
+        const debugUtil = new Debug(this.config.debug)
         debugUtil.giveProfileAllKeysAndGildedCases(staticRouterModService, saveServer, logger)
         debugUtil.removeAllDebugInstanceIdsFromProfile(staticRouterModService, saveServer)
     }
@@ -89,7 +88,7 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
     public postDBLoad(container: DependencyContainer): void {
         this.logger = container.resolve<ILogger>("WinstonLogger");
         this.logger.log(`[${this.modName}] : Mod loading`, LogTextColor.GREEN);
-        const debugUtil = new Debug()
+        const debugUtil = new Debug(this.config.debug)
         const databaseServer = container.resolve<DatabaseServer>("DatabaseServer");
         const dbTables = databaseServer.getTables();
         const restrInRaid = dbTables.globals.config.RestrictionsInRaid;
@@ -100,9 +99,9 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
 
         this.combatibilityThings(dbItems)
 
-        for (const configName of this.caseConfigNames)
+        for (const caseName of Object.keys(cases))
         {
-            this.createCase(container, config[configName], dbTables);
+            this.createCase(container, cases[caseName], dbTables);
         }
 
         this.pushSupportiveBarters(dbTraders)
@@ -112,10 +111,22 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         debugUtil.logMissingKeys(this.logger, this.itemHelper, dbItems, dbLocales)
     }
 
+    loadConfig(): void {
+        const userConfigPath = path.resolve(__dirname, "../config/config.json5");
+        const defaultConfigPath = path.resolve(__dirname, "../config/config.default.json5");
+
+        // Copy the default config if the user config doesn't exist yet
+        if (!existsSync(userConfigPath))
+        {
+            copyFileSync(defaultConfigPath, userConfigPath);
+        }
+
+        this.config = JSON5.parse(this.vfs.readFile(userConfigPath));
+    }
+
     pushSupportiveBarters(dbTraders: Record<string, ITrader>):void{
-        const additionalBarters = config["Additional Barter Trades"];
-        for (const bart in additionalBarters){
-            this.pushToTrader(additionalBarters[bart], additionalBarters[bart].id, dbTraders);
+        for (const barter of Object.keys(barters)){
+            this.pushToTrader(barters[barter], barters[barter].id, dbTraders);
         }
     }
 
@@ -147,27 +158,27 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
             // Adjust key specific properties
             if (this.itemHelper.isOfBaseclass(item._id, BaseClasses.KEY)){
 
-                if (config.weightless_keys){
+                if (this.config.weightless_keys){
                     itemProps.Weight = 0.0;
                 }
 
-                itemProps.InsuranceDisabled = !config.key_insurance_enabled;
+                itemProps.InsuranceDisabled = !this.config.key_insurance_enabled;
 
                 // If keys are to be set to no limit, and we're either not using the finite keys list, or this key doesn't exist
                 // in it, set the key max usage to 0 (infinite)
-                if (config.no_key_use_limit && 
-                    (!config.use_finite_keys_list || !config.finite_keys_list.includes(item._id)))
+                if (this.config.no_key_use_limit && 
+                    (!this.config.use_finite_keys_list || !this.config.finite_keys_list.includes(item._id)))
                 {
                     itemProps.MaximumNumberOfUsage = 0;
                 }
                 
-                if (config.keys_are_discardable){
+                if (this.config.keys_are_discardable){
                     itemProps.DiscardLimit = -1
                 }
             }
 
             // Remove keys from secure container exclude filter
-            if (config.all_keys_in_secure && this.itemHelper.isOfBaseclass(item._id, BaseClasses.MOB_CONTAINER) && itemProps?.Grids) {
+            if (this.config.all_keys_in_secure && this.itemHelper.isOfBaseclass(item._id, BaseClasses.MOB_CONTAINER) && itemProps?.Grids) {
                 // Theta container has multiple grids, so we need to loop through all grids
                 for (const grid of itemProps.Grids) {
                     const filter = grid?._props?.filters[0];
@@ -207,56 +218,56 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         }
     }
 
-    createCase(container, config, tables){
+    createCase(container, caseConfig, tables){
         const handbook = tables.templates.handbook;
         const locales = Object.values(tables.locales.global) as Record<string, string>[];
-        const itemID = config.id
+        const itemID = caseConfig.id
         const itemPrefabPath = `CaseBundles/${itemID}.bundle`
         const templateId = this.newIdMap[itemID];
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         let item: any;
 
         //clone a case
-        if (config.case_type === "container"){
+        if (caseConfig.case_type === "container"){
             item = structuredClone(tables.templates.items["5d235bb686f77443f4331278"]);
             item._props.IsAlwaysAvailableForInsurance = true;
             item._props.DiscardLimit = -1;
         }
 
-        if (config.case_type === "slots"){
+        if (caseConfig.case_type === "slots"){
             item = structuredClone(tables.templates.items["5a9d6d00a2750c5c985b5305"]);
             item._props.IsAlwaysAvailableForInsurance = true;
             item._props.DiscardLimit = -1;
-            item._props.ItemSound = config.sound;
+            item._props.ItemSound = caseConfig.sound;
         }
 
         item._id = templateId;
         item._props.Prefab.path = itemPrefabPath;
 
         //call methods to set the grid or slot cells up
-        if (config.case_type === "container"){
-            item._props.Grids = this.createGrid(container, templateId, config);
+        if (caseConfig.case_type === "container"){
+            item._props.Grids = this.createGrid(container, templateId, caseConfig);
         }
-        if (config.case_type === "slots"){
-            item._props.Slots = this.createSlot(container, templateId, config);
+        if (caseConfig.case_type === "slots"){
+            item._props.Slots = this.createSlot(container, templateId, caseConfig);
         }
         
         //set external size of the container:
-        item._props.Width = config.ExternalSize.width;
-        item._props.Height = config.ExternalSize.height;
+        item._props.Width = caseConfig.ExternalSize.width;
+        item._props.Height = caseConfig.ExternalSize.height;
 
         tables.templates.items[templateId] = item;
         
         //add locales
         for (const locale of locales) {
-            locale[`${templateId} Name`] = config.item_name;
-            locale[`${templateId} ShortName`] = config.item_short_name;
-            locale[`${templateId} Description`] = config.item_description;
+            locale[`${templateId} Name`] = caseConfig.item_name;
+            locale[`${templateId} ShortName`] = caseConfig.item_short_name;
+            locale[`${templateId} Description`] = caseConfig.item_description;
         }
 
-        item._props.CanSellOnRagfair = !config.flea_banned;
-        item._props.InsuranceDisabled = !config.insurance_enabled;
-        const price = config.flea_price
+        item._props.CanSellOnRagfair = !caseConfig.flea_banned;
+        item._props.InsuranceDisabled = !caseConfig.insurance_enabled;
+        const price = caseConfig.flea_price
 
         handbook.Items.push(
             {
@@ -270,16 +281,16 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         this.allowIntoContainers(
             templateId,
             tables.templates.items,
-            config.allow_in_secure_containers,
-            config.allow_in_backpacks,
-            config.case_allowed_in,
-            config.case_disallowed_in
+            caseConfig.allow_in_secure_containers,
+            caseConfig.allow_in_backpacks,
+            caseConfig.case_allowed_in,
+            caseConfig.case_disallowed_in
         );
 
-        this.pushToTrader(config, templateId, tables.traders);
+        this.pushToTrader(caseConfig, templateId, tables.traders);
     }
 
-    pushToTrader(config, itemID:string, dbTraders: Record<string, ITrader>){
+    pushToTrader(caseConfig, itemID:string, dbTraders: Record<string, ITrader>){
         const traderIDs = {
             mechanic: "5a7c2eca46aef81a7ca2145d",
             skier: "58330581ace78e27b8b10cee",
@@ -299,10 +310,10 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         */
 
         //add to config trader's inventory
-        let traderToPush = config.trader;
+        let traderToPush = caseConfig.trader;
         for (const [key, val] of Object.entries(traderIDs))
         {
-            if (key === config.trader){
+            if (key === caseConfig.trader){
                 traderToPush = val;
             }
         }
@@ -315,21 +326,21 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
             slotId: "hideout",
             upd:
             {
-                UnlimitedCount: config.unlimited_stock,
-                StackObjectsCount: config.stock_amount
+                UnlimitedCount: caseConfig.unlimited_stock,
+                StackObjectsCount: caseConfig.stock_amount
             }
         });
 
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         const barterTrade: any = [];
-        const configBarters = config.barter;
+        const configBarters = caseConfig.barter;
 
         for (const barter in configBarters){
             barterTrade.push(configBarters[barter]);
         }
 
         trader.assort.barter_scheme[itemID] = [barterTrade];
-        trader.assort.loyal_level_items[itemID] = config.trader_loyalty_level;
+        trader.assort.loyal_level_items[itemID] = caseConfig.trader_loyalty_level;
     }
 
     allowIntoContainers(itemID, items: Record<string, ITemplateItem>, secContainers, backpacks, addAllowedIn, addDisallowedIn): void {
@@ -446,7 +457,7 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         }
 
         for (let i = 0; i < cellWidth.length; i++) {
-            if ((i === UCcellToApply-1) || (UCcellToApply[i] === ("y" || "Y"))){
+            if ((i === UCcellToApply-1) || (UCcellToApply[i] === "y" || UCcellToApply[i] === "Y")){
                 grids.push(this.generateGridColumn(container, itemID, `column${i}`, cellWidth[i], cellHeight[i], UCinFilt, UCexFilt));
             } else {
                 grids.push(this.generateGridColumn(container, itemID, `column${i}`, cellWidth[i], cellHeight[i], inFilt, exFilt));
@@ -547,10 +558,10 @@ class Mod implements IPostSptLoadMod, IPostDBLoadMod, IPreSptLoadMod {
         const pmcInventory = structuredClone(pmcProfile.Inventory.items);
 
         // Look for any key cases in the user's inventory, and properly update the child key locations if we've moved them
-        for (const configName of this.caseConfigNames)
+        for (const caseName of Object.keys(cases))
         {
             // Skip cases that aren't set slots
-            const caseConfig = config[configName];
+            const caseConfig = cases[caseName];
             if (caseConfig.case_type !== "slots") continue;
             const templateId = this.newIdMap[caseConfig.id];
 

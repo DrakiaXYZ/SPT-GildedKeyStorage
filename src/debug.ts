@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/brace-style */
-import * as config from "../config/config.json";
-
 import type { ILogger } from "@spt/models/spt/utils/ILogger";
 import { LogTextColor } from "@spt/models/spt/logging/LogTextColor";
 import type { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
@@ -8,18 +6,26 @@ import { BaseClasses } from "@spt/models/enums/BaseClasses";
 import type { StaticRouterModService } from "@spt/services/mod/staticRouter/StaticRouterModService";
 import type { SaveServer } from "@spt/servers/SaveServer";
 import type { ItemHelper } from "@spt/helpers/ItemHelper";
+import * as cases from "../config/cases.json";
 
-const debugConfig = config.debug
 const keysInConfig:Array<string> = [
-    ...config["Golden Keycard Case"].slot_ids,
-    ...config["Golden Keychain Mk. I"].slot_ids,
-    ...config["Golden Keychain Mk. II"].slot_ids,
-    ...config["Golden Keychain Mk. III"].slot_ids
+    ...cases["Golden Keycard Case"].slot_ids,
+    ...cases["Golden Keychain Mk. I"].slot_ids,
+    ...cases["Golden Keychain Mk. II"].slot_ids,
+    ...cases["Golden Keychain Mk. III"].slot_ids
 ]
 
-export class Debug{
+export class Debug
+{
+    debugConfig: any;
+
+    constructor(debugConfig: any)
+    {
+        this.debugConfig = debugConfig;
+    }
+
     logMissingKeys(logger:ILogger, itemHelper:ItemHelper, dbItems:Record<string, ITemplateItem>, dbLocales: Record<string, string>):void{
-        if (!debugConfig.log_missing_keys) return
+        if (!this.debugConfig.log_missing_keys) return
 
         logger.log("[Gilded Key Storage]: Keys missing from config: ", LogTextColor.MAGENTA)
         logger.log("-------------------------------------------", LogTextColor.YELLOW)
@@ -54,7 +60,7 @@ export class Debug{
     }
 
     giveProfileAllKeysAndGildedCases(staticRouterModService:StaticRouterModService, saveServer: SaveServer, logger:ILogger):void{
-        if (!debugConfig.give_profile_all_keys) return
+        if (!this.debugConfig.give_profile_all_keys) return
 
         staticRouterModService.registerStaticRouter(
             "On_Game_Start_Gilded_Key_Storage",
@@ -111,10 +117,10 @@ export class Debug{
 
     removeAllDebugInstanceIdsFromProfile(staticRouterModService:StaticRouterModService, saveServer: SaveServer):void{
 
-        if (!debugConfig.give_profile_all_keys && !debugConfig.force_remove_debug_items_on_start) return
+        if (!this.debugConfig.give_profile_all_keys && !this.debugConfig.force_remove_debug_items_on_start) return
 
         let urlHook = "/client/game/logout"
-        if (debugConfig.force_remove_debug_items_on_start){
+        if (this.debugConfig.force_remove_debug_items_on_start){
             urlHook = "/client/game/start"
         }
 
@@ -152,11 +158,11 @@ export class Debug{
     getArrayOfKeysAndCases():Array<any>{
         const keysAndCases = [
             ...keysInConfig,
-            config["Golden Key Pouch"].id,
-            config["Golden Keycard Case"].id,
-            config["Golden Keychain Mk. I"].id,
-            config["Golden Keychain Mk. II"].id,
-            config["Golden Keychain Mk. III"].id
+            cases["Golden Key Pouch"].id,
+            cases["Golden Keycard Case"].id,
+            cases["Golden Keychain Mk. I"].id,
+            cases["Golden Keychain Mk. II"].id,
+            cases["Golden Keychain Mk. III"].id
         ]
 
         for (let i = keysAndCases.length; i > 0; i--){

@@ -1,10 +1,10 @@
 {
     "name": "Gilded Key Storage",
-    "version": "1.4.2",
+    "version": "1.5.0",
     "main": "src/mod.js",
     "license": "CC BY-NC-ND 4.0",
     "author": "Jehree",
-    "sptVersion": "~3.9",
+    "sptVersion": "~3.10",
     "isBundleMod": true,
     "scripts": {
         "setup": "npm i",
@@ -19,6 +19,7 @@
         "eslint": "8.57",
         "fs-extra": "11.2",
         "ignore": "^5.2",
+        "json5": "~2.2",
         "tsyringe": "4.8.0",
         "typescript": "5.4",
         "winston": "3.12"
