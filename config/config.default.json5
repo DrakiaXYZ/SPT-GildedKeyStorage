@@ -1,7 +1,7 @@
 {
-    "key_insurance_enabled": true,
+    "key_insurance_enabled": false,
     "weightless_keys": true,
-    "no_key_use_limit": true,
+    "no_key_use_limit": false,
     "keys_are_discardable": true,
     "all_keys_in_secure": true,
     "use_finite_keys_list": false,
