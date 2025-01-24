@@ -172,8 +172,14 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
                     itemProps.MaximumNumberOfUsage = 0;
                 }
                 
-                if (this.config.keys_are_discardable){
-                    itemProps.DiscardLimit = -1
+                if (this.config.keys_are_discardable) {
+                    // BSG uses DiscordLimit == 0 to flag as not insurable, so we need to swap to the flag
+                    if (itemProps.DiscardLimit === 0)
+                    {
+                        itemProps.InsuranceDisabled = true;
+                    }
+
+                    itemProps.DiscardLimit = -1;
                 }
             }
 
