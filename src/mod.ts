@@ -97,6 +97,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
         const dbItems = dbTemplates.items
         const dbLocales = dbTables.locales.global.en
 
+        debugUtil.logRareKeys(this.logger, this.itemHelper, dbItems, dbLocales)
         this.combatibilityThings(dbItems)
 
         for (const caseName of Object.keys(cases))
