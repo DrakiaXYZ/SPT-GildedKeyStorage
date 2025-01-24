@@ -373,6 +373,11 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
                     this.allowOrDisallowIntoCaseByID(itemID, "include", item);
                 }
             }
+
+            if(this.config.allowInSpecialSlots && (item._id === "627a4e6b255f7527fb05a0f6" || item._id === "65e080be269cbd5c5005e529")){
+                this.allowInSpecialSlots(itemID, item)
+                this.allowInSpecialSlots(itemID, item)
+            }
         }
     }
 
@@ -428,6 +433,12 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
                 }
             }
         }      
+    }
+
+    allowInSpecialSlots(customItemID, currentItem): void {
+        for (const slot of currentItem._props.Slots) {
+                slot._props.filters[0].Filter.push(customItemID)
+        }
     }
 
     createGrid(container, itemID, config) {

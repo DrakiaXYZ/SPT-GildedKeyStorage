@@ -43,6 +43,7 @@
       "6711039f9e648049e50b3307", // TerraGroup Labs residential unit keycard , Uses: 2
     ],
 
+    "allowInSpecialSlots": true,
     "debug": {
         "log_missing_keys": false,
         "log_rare_keys": true,
