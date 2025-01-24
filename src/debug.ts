@@ -51,6 +51,30 @@ export class Debug
         }
     }
 
+    logRareKeys(logger:ILogger, itemHelper:ItemHelper, dbItems:Record<string, ITemplateItem>, dbLocales: Record<string, string>):void{
+        if (!this.debugConfig.log_rare_keys) return
+
+        logger.log("[Gilded Key Storage]: Rare key list: ", LogTextColor.CYAN)
+        logger.log("-------------------------------------------", LogTextColor.YELLOW)
+
+        for (const itemID in dbItems){
+            const thisItem = dbItems[itemID]
+
+            // Skip items that aren't items
+            if (thisItem._type !== "Item") continue;
+
+            // Skip non-keys
+            if (!itemHelper.isOfBaseclass(thisItem._id, BaseClasses.KEY)) continue;
+
+            // Skip quest keys
+            if (thisItem._props.QuestItem) continue;
+
+            if (thisItem._props.MaximumNumberOfUsage < 11){
+                logger.log(`      "${itemID}", // ${dbLocales[`${itemID} Name`]}, Uses: ${thisItem._props.MaximumNumberOfUsage}`, LogTextColor.CYAN)
+            }
+        }
+    }
+
     isKeyMissing(keyId:string):boolean{
         if (keysInConfig.includes(keyId)){
             return false
