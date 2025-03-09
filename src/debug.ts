@@ -24,7 +24,7 @@ export class Debug
         this.debugConfig = debugConfig;
     }
 
-    logMissingKeys(logger:ILogger, itemHelper:ItemHelper, dbItems:Record<string, ITemplateItem>, dbLocales: Record<string, string>):void{
+    logMissingKeys(logger:ILogger, itemHelper:ItemHelper, dbItems:Record<string, ITemplateItem>, dbLocales: Record<string, string>, ignoredKeyList: string[]):void{
         if (!this.debugConfig.log_missing_keys) return
 
         logger.log("[Gilded Key Storage]: Keys missing from config: ", LogTextColor.MAGENTA)
@@ -32,6 +32,9 @@ export class Debug
 
         for (const itemID in dbItems){
             const thisItem = dbItems[itemID]
+
+            // Skip if the item is in our ignore list
+            if (ignoredKeyList.includes(itemID)) continue;
 
             // Skip items that aren't items
             if (thisItem._type !== "Item") continue;
@@ -69,7 +72,7 @@ export class Debug
             // Skip quest keys
             if (thisItem._props.QuestItem) continue;
 
-            if (thisItem._props.MaximumNumberOfUsage < 11){
+            if (thisItem._props.MaximumNumberOfUsage <= 10){
                 logger.log(`      "${itemID}", // ${dbLocales[`${itemID} Name`]}, Uses: ${thisItem._props.MaximumNumberOfUsage}`, LogTextColor.CYAN)
             }
         }

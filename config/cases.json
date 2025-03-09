@@ -7,8 +7,6 @@
         "item_short_name": "Key Box",
         "item_description": "Secure and compact storage for your Golden Keychains and Golden Keycard Holder, as well as some extra space for loose keys.",
         "flea_price": 3000000,
-        "flea_banned": true,
-        "insurance_enabled": true,
 
         "trader": "therapist",
         "trader_loyalty_level": 2,
@@ -70,8 +68,6 @@
         "item_short_name": "Mk. I",
         "item_description": "One of 3 gold keychains. This one contains all Ground Zero, Factory, Woods, Customs, Interchange, and Misc keys.",
         "flea_price": 1000000,
-        "flea_banned": true,
-        "insurance_enabled": true,
         "sound": "keys",
 
         "trader": "therapist",
@@ -118,6 +114,7 @@
             "591ae8f986f77406f854be45",
             "5d08d21286f774736e7c94c3",
             "664d3db6db5dea2bad286955",
+            "6761a6ccd9bbb27ad703c48a",
 
             "5938994586f774523a425196",
             "5914578086f774123569ffa4",
@@ -149,6 +146,7 @@
             "5913915886f774123603c392",
             "5da743f586f7744014504f72",
             "664d4b0103ef2c61246afb56",
+            "6761a6f90575f25e020816a4",
             
             "5ad5d49886f77455f9731921",
             "5ad5db3786f7743568421cce",
@@ -182,8 +180,6 @@
         "item_short_name": "Mk. II",
         "item_description": "One of 3 gold keychains. This one contains all Lighthouse and Shoreline keys.",
         "flea_price": 1000000,
-        "flea_banned": true,
-        "insurance_enabled": true,
         "sound": "keys",
 
         "trader": "ragman",
@@ -291,8 +287,6 @@
         "item_short_name": "Mk. III",
         "item_description": "One of 3 gold keychains. This one contains all Streets, Reserve, and Labs keys.",
         "flea_price": 1000000,
-        "flea_banned": true,
-        "insurance_enabled": true,
         "sound": "keys",
 
         "trader": "skier",
@@ -379,8 +373,6 @@
         "item_short_name": "Keycards",
         "item_description": "A shiny keycard case that can hold every keycard in the game, including a few Labs Access cards.",
         "flea_price": 1000000,
-        "flea_banned": true,
-        "insurance_enabled": true,
         "sound": "container_plastic",
 
         "trader": "peacekeeper",

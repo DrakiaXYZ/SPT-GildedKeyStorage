@@ -11,23 +11,25 @@ import type { HashUtil } from "@spt/utils/HashUtil";
 import type { DatabaseServer } from "@spt/servers/DatabaseServer";
 import type { ILogger } from "@spt/models/spt/utils/ILogger";
 import { BaseClasses } from "@spt/models/enums/BaseClasses";
+import { ItemTpl } from "@spt/models/enums/ItemTpl";
+import { Traders } from "@spt/models/enums/Traders";
 import { LogTextColor } from "@spt/models/spt/logging/LogTextColor";
 import type { GameController } from "@spt/controllers/GameController";
 import type { IEmptyRequestData } from "@spt/models/eft/common/IEmptyRequestData";
-import { VFS } from "@spt/utils/VFS";
+import type { ITrader } from "@spt/models/eft/common/tables/ITrader";
+import type { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
+import { FileSystemSync } from "@spt/utils/FileSystemSync";
 import { Debug } from "./debug";
 
 import barters from "../config/barters.json";
 import cases from "../config/cases.json";
 
-import type { ITrader } from "@spt/models/eft/common/tables/ITrader";
-import type { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
-import { ItemTpl } from "@spt/models/enums/ItemTpl";
 import path from "path";
 import { copyFileSync, existsSync } from "fs";
 import JSON5 from "json5";
 
 class Mod implements IPostDBLoadMod, IPreSptLoadMod {
+    private HANDBOOK_GEARCASES = "5b5f6fa186f77409407a7eb7";
     newIdMap = {
         Golden_Key_Pouch: "661cb36922c9e10dc2d9514b",
         Golden_Keycard_Case: "661cb36f5441dc730e28bcb0",
@@ -35,6 +37,27 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
         Golden_Keychain2: "661cb3743bf00d3d145518b3",
         Golden_Keychain3: "661cb376b16226f648eb0cdc"
     };
+
+    // These are keys that BSG added with no actual use, or drop chance. Ignore them for now
+    // These should be confirmed every client update to still be unused
+    private ignoredKeyList = [
+        "5671446a4bdc2d97058b4569",
+        "57518f7724597720a31c09ab",
+        "57518fd424597720c85dbaaa",
+        "5751916f24597720a27126df",
+        "5751961824597720a31c09ac",
+        "590de4a286f77423d9312a32",
+        "590de52486f774226a0c24c2",
+        "61a6446f4b5f8b70f451b166",
+        "63a39ddda3a2b32b5f6e007a",
+        "63a39e0f64283b5e9c56b282",
+        "63a39e5b234195315d4020bf",
+        "63a39e6acd6db0635c1975fe",
+        "63a71f1a0aa9fb29da61c537",
+        "63a71f3b0aa9fb29da61c539",
+        "658199a0490414548c0fa83b",
+        "6582dc63cafcd9485374dbc5"
+    ];
     
     logger: ILogger
     modName: string
@@ -42,7 +65,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
     container: DependencyContainer;
     profileHelper: ProfileHelper;
     itemHelper: ItemHelper;
-    vfs: VFS;
+    fileSystemSync: FileSystemSync;
     config: any;
 
     constructor() {
@@ -57,7 +80,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
         const logger = container.resolve<ILogger>("WinstonLogger")
         this.profileHelper = container.resolve<ProfileHelper>("ProfileHelper");
         this.itemHelper = container.resolve<ItemHelper>("ItemHelper");
-        this.vfs = container.resolve<VFS>("VFS");
+        this.fileSystemSync = container.resolve<FileSystemSync>("FileSystemSync");
 
         // Load our config
         this.loadConfig();
@@ -97,7 +120,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
         const dbItems = dbTemplates.items
         const dbLocales = dbTables.locales.global.en
 
-        debugUtil.logRareKeys(this.logger, this.itemHelper, dbItems, dbLocales)
+        debugUtil.logRareKeys(this.logger, this.itemHelper, dbItems, dbLocales);
         this.combatibilityThings(dbItems)
 
         for (const caseName of Object.keys(cases))
@@ -109,7 +132,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
         this.adjustItemProperties(dbItems)
         this.setLabsCardInRaidLimit(restrInRaid, 9)
 
-        debugUtil.logMissingKeys(this.logger, this.itemHelper, dbItems, dbLocales)
+        debugUtil.logMissingKeys(this.logger, this.itemHelper, dbItems, dbLocales, this.ignoredKeyList)
     }
 
     loadConfig(): void {
@@ -122,7 +145,12 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
             copyFileSync(defaultConfigPath, userConfigPath);
         }
 
-        this.config = JSON5.parse(this.vfs.readFile(userConfigPath));
+        // Create the config as a merge of the default and user configs, so we always
+        // have the default values available, even if missing in the user config
+        this.config = {
+            ...JSON5.parse(this.fileSystemSync.read(defaultConfigPath)),
+            ...JSON5.parse(this.fileSystemSync.read(userConfigPath))
+        };
     }
 
     pushSupportiveBarters(dbTraders: Record<string, ITrader>):void{
@@ -139,7 +167,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
         //set labs access card limit in raid to 9 so the keycard case can be filled while on pmc
         for (const restr in restrInRaid){
             const thisRestriction = restrInRaid[restr]
-            if (thisRestriction.TemplateId === "5c94bbff86f7747ee735c08f"){
+            if (thisRestriction.TemplateId === ItemTpl.KEYCARD_TERRAGROUP_LABS_ACCESS){
                 thisRestriction.MaxInLobby = limitAmount;
                 thisRestriction.MaxInRaid = limitAmount;
             }
@@ -213,7 +241,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
             if (
                 item._parent === BaseClasses.BACKPACK ||
                 item._parent === BaseClasses.VEST ||
-                (this.itemHelper.isOfBaseclass(item._id, BaseClasses.MOB_CONTAINER) && item._id !== "5c0a794586f77461c458f892")
+                (this.itemHelper.isOfBaseclass(item._id, BaseClasses.MOB_CONTAINER) && item._id !== ItemTpl.SECURE_CONTAINER_BOSS)
             ) {
                 for (const grid of item._props.Grids)
                 {
@@ -236,13 +264,13 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
 
         //clone a case
         if (caseConfig.case_type === "container"){
-            item = structuredClone(tables.templates.items["5d235bb686f77443f4331278"]);
+            item = structuredClone(tables.templates.items[ItemTpl.CONTAINER_SICC]);
             item._props.IsAlwaysAvailableForInsurance = true;
             item._props.DiscardLimit = -1;
         }
 
         if (caseConfig.case_type === "slots"){
-            item = structuredClone(tables.templates.items["5a9d6d00a2750c5c985b5305"]);
+            item = structuredClone(tables.templates.items[ItemTpl.MOUNT_STRIKE_INDUSTRIES_KEYMOD_4_INCH_RAIL]);
             item._props.IsAlwaysAvailableForInsurance = true;
             item._props.DiscardLimit = -1;
             item._props.ItemSound = caseConfig.sound;
@@ -272,14 +300,14 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
             locale[`${templateId} Description`] = caseConfig.item_description;
         }
 
-        item._props.CanSellOnRagfair = !caseConfig.flea_banned;
-        item._props.InsuranceDisabled = !caseConfig.insurance_enabled;
+        item._props.CanSellOnRagfair = !this.config.cases_flea_banned;
+        item._props.InsuranceDisabled = !this.config.cases_insurance_enabled;
         const price = caseConfig.flea_price
 
         handbook.Items.push(
             {
                 Id: templateId,
-                ParentId: "5b5f6fa186f77409407a7eb7",
+                ParentId: this.HANDBOOK_GEARCASES,
                 Price: price
             }
         );
@@ -287,11 +315,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
         //allow or disallow in secure containers, backpacks, other specific items per the config
         this.allowIntoContainers(
             templateId,
-            tables.templates.items,
-            caseConfig.allow_in_secure_containers,
-            caseConfig.allow_in_backpacks,
-            caseConfig.case_allowed_in,
-            caseConfig.case_disallowed_in
+            tables.templates.items
         );
 
         this.pushToTrader(caseConfig, templateId, tables.traders);
@@ -299,22 +323,14 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
 
     pushToTrader(caseConfig, itemID:string, dbTraders: Record<string, ITrader>){
         const traderIDs = {
-            mechanic: "5a7c2eca46aef81a7ca2145d",
-            skier: "58330581ace78e27b8b10cee",
-            peacekeeper: "5935c25fb3acc3127c3d8cd9",
-            therapist: "54cb57776803fa99248b456e",
-            prapor: "54cb50c76803fa8b248b4571",
-            jaeger: "5c0647fdd443bc2504c2d371",
-            ragman: "5ac3b934156ae10c4430e83c"
+            mechanic: Traders.MECHANIC,
+            skier: Traders.SKIER,
+            peacekeeper: Traders.PEACEKEEPER,
+            therapist: Traders.THERAPIST,
+            prapor: Traders.PRAPOR,
+            jaeger: Traders.JAEGER,
+            ragman: Traders.RAGMAN
         };
-
-        /*
-        const currencyIDs = {
-            "roubles": "5449016a4bdc2d6f028b456f",
-            "euros": "569668774bdc2da2298b4568",
-            "dollars": "5696686a4bdc2da3298b456a"
-        };
-        */
 
         //add to config trader's inventory
         let traderToPush = caseConfig.trader;
@@ -350,67 +366,67 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
         trader.assort.loyal_level_items[itemID] = caseConfig.trader_loyalty_level;
     }
 
-    allowIntoContainers(itemID, items: Record<string, ITemplateItem>, secContainers, backpacks, addAllowedIn, addDisallowedIn): void {
+    allowIntoContainers(itemID, items: Record<string, ITemplateItem>): void {
         for (const [_, item] of Object.entries(items)){
             // Skip non-items
             if (item._type !== "Item") continue;
             
             //disallow in backpacks
-            if (!backpacks){
+            if (!this.config.allow_in_backpacks){
                 this.allowOrDisallowIntoCaseByParent(itemID, "exclude", item, BaseClasses.BACKPACK);
             }
 
             //allow in secure containers
-            if (secContainers){
+            if (this.config.allow_in_secure_containers){
                 this.allowOrDisallowIntoCaseByParent(itemID, "include", item, BaseClasses.MOB_CONTAINER);
             }
 
             //disallow in additional specific items
-            for (const configItem in addDisallowedIn){
-                if (addDisallowedIn[configItem] === item._id){
+            for (const configItem in this.config.case_disallowed_in){
+                if (this.config.case_disallowed_in[configItem] === item._id){
                     this.allowOrDisallowIntoCaseByID(itemID, "exclude", item);
                 }
 
             }
 
             //allow in additional specific items
-            for (const configItem in addAllowedIn){
-                if (addAllowedIn[configItem] === item._id){
+            for (const configItem in this.config.case_allowed_in){
+                if (this.config.case_allowed_in[configItem] === item._id){
                     this.allowOrDisallowIntoCaseByID(itemID, "include", item);
                 }
             }
 
-            if(this.config.allowInSpecialSlots && (item._id === "627a4e6b255f7527fb05a0f6" || item._id === "65e080be269cbd5c5005e529")){
-                this.allowInSpecialSlots(itemID, item)
-                this.allowInSpecialSlots(itemID, item)
+            // Allow in special slots
+            if (this.config.allow_cases_in_special && (item._id === ItemTpl.POCKETS_1X4_SPECIAL || item._id === ItemTpl.POCKETS_1X4_TUE)){
+                this.allowInSpecialSlots(itemID, item);
+                this.allowInSpecialSlots(itemID, item);
             }
         }
     }
 
     allowOrDisallowIntoCaseByParent(customItemID, includeOrExclude, currentItem, caseParent): void {
+        // Skip if the parent isn't our case parent
+        if (currentItem._parent !== caseParent || currentItem._id === ItemTpl.SECURE_CONTAINER_BOSS)
+        {
+            return;
+        }
 
-        //exclude custom case in all items of caseToApplyTo parent
-        if (includeOrExclude === "exclude"){
+        if (includeOrExclude === "exclude") {
             for (const grid of currentItem._props.Grids) {
-                if (currentItem._parent === caseParent && currentItem._id !== "5c0a794586f77461c458f892"){
-                    if (grid._props.filters[0].ExcludedFilter === undefined){
-                        grid._props.filters[0].ExcludedFilter = [customItemID];
-                    } else {                 
-                        grid._props.filters[0].ExcludedFilter.push(customItemID)
-                    }
+                if (grid._props.filters[0].ExcludedFilter === undefined) {
+                    grid._props.filters[0].ExcludedFilter = [customItemID];
+                } else {                 
+                    grid._props.filters[0].ExcludedFilter.push(customItemID)
                 }
             }
         }
 
-        //include custom case in all items of caseToApplyTo parent
-        if (includeOrExclude === "include"){
-            if (currentItem._parent === caseParent && currentItem._id !== "5c0a794586f77461c458f892"){
-                for (const grid of currentItem._props.Grids) {
-                    if (grid._props.filters[0].Filter === undefined){
-                        grid._props.filters[0].Filter = [customItemID];
-                    } else {
-                        grid._props.filters[0].Filter.push(customItemID)
-                    }
+        if (includeOrExclude === "include") {
+            for (const grid of currentItem._props.Grids) {
+                if (grid._props.filters[0].Filter === undefined) {
+                    grid._props.filters[0].Filter = [customItemID];
+                } else {
+                    grid._props.filters[0].Filter.push(customItemID)
                 }
             }
         }
@@ -443,7 +459,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
 
     allowInSpecialSlots(customItemID, currentItem): void {
         for (const slot of currentItem._props.Slots) {
-                slot._props.filters[0].Filter.push(customItemID)
+            slot._props.filters[0]?.Filter.push(customItemID);
         }
     }
 

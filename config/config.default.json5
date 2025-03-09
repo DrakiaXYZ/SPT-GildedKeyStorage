@@ -1,52 +1,54 @@
 {
     "key_insurance_enabled": false,
+    "cases_insurance_enabled": false,
+    "cases_flea_banned": true,
     "weightless_keys": true,
     "no_key_use_limit": false,
     "keys_are_discardable": true,
     "all_keys_in_secure": true,
+    "allow_cases_in_special": false,
     "use_finite_keys_list": false,
     "finite_keys_list":[
-      "5780cf7f2459777de4559322", // Dorm room 314 marked key, Uses: 10
-      "5937ee6486f77408994ba448", // Machinery key, Uses: 1
-      "593962ca86f774068014d9af", // Unknown key, Uses: 1
-      // "5c1d0c5f86f7744bb2683cf0", // TerraGroup Labs keycard (Blue), Uses: 10
-      // "5c1d0d6d86f7744bb2683e1f", // TerraGroup Labs keycard (Yellow), Uses: 10
-      // "5c1d0dc586f7744baf2e7b79", // TerraGroup Labs keycard (Green), Uses: 10
-      // "5c1d0efb86f7744baf2e7b7b", // TerraGroup Labs keycard (Red), Uses: 10
-      // "5c1d0f4986f7744bb01837fa", // TerraGroup Labs keycard (Black), Uses: 10
-      // "5c1e495a86f7743109743dfb", // TerraGroup Labs keycard (Violet), Uses: 10
-      "5c94bbff86f7747ee735c08f", // TerraGroup Labs access keycard, Uses: 1
-      "5d08d21286f774736e7c94c3", // Shturman's stash key, Uses: 1
-      "5d80c60f86f77440373c4ece", // RB-BK marked key, Uses: 10
-      "5d80c62a86f7744036212b3f", // RB-VO marked key, Uses: 10
-      // "5e42c81886f7742a01529f57", // Object #11SR keycard, Uses: 10
-      // "5e42c83786f7742a021fdf3c", // Object #21WS keycard, Uses: 10
-      "5ede7a8229445733cb4c18e2", // RB-PKPM marked key, Uses: 10
-      "5efde6b4f5448336730dbd61", // Keycard with a blue marking, Uses: 1
-      "62987dfc402c7f69bf010923", // Shared bedroom marked key, Uses: 10
-      "6391fcf5744e45201147080f", // Primorsky Ave apartment key, Uses: 1
-      "6398fd8ad3de3849057f5128", // Backup hideout key, Uses: 1
-      "63a397d3af870e651d58e65b", // Car dealership closed section key, Uses: 1
-      "63a39e1d234195315d4020bd", // Primorsky 46-48 skybridge key, Uses: 1
-      "63a3a93f8a56922e82001f5d", // Abandoned factory marked key, Uses: 10
-      "64ccc25f95763a1ae376e447", // Mysterious room marked key, Uses: 10
-      "64ce572331dd890873175115", // Aspect company office key, Uses: 1
-      "64d4b23dc1b37504b41ac2b6", // Rusted bloody key, Uses: 1
-      "658199aa38c79576a2569e13", // TerraGroup science office key, Uses: 1
-      "6582dbf0b8d7830efc45016f", // Relaxation room key, Uses: 2
-      "664d3db6db5dea2bad286955", // Shatun's hideout key, Uses: 5
-      "664d3dd590294949fe2d81b7", // Grumpy's hideout key, Uses: 5
-      "664d3ddfdda2e85aca370d75", // Voron's hideout key, Uses: 5
-      "664d3de85f2355673b09aed5", // Leon's hideout key, Uses: 5
-      "664d4b0103ef2c61246afb56", // Dorm overseer key, Uses: 2
-      "66acd6702b17692df20144c0", // TerraGroup storage room keycard, Uses: 10
-      "6711039f9e648049e50b3307", // TerraGroup Labs residential unit keycard , Uses: 2
+        "5780cf7f2459777de4559322", // Dorm room 314 marked key, Uses: 10
+        "5937ee6486f77408994ba448", // Machinery key, Uses: 1
+        "593962ca86f774068014d9af", // Unknown key, Uses: 1
+        "5c94bbff86f7747ee735c08f", // TerraGroup Labs access keycard, Uses: 1
+        "5d08d21286f774736e7c94c3", // Shturman's stash key, Uses: 1
+        "5d80c60f86f77440373c4ece", // RB-BK marked key, Uses: 10
+        "5d80c62a86f7744036212b3f", // RB-VO marked key, Uses: 10
+        "5ede7a8229445733cb4c18e2", // RB-PKPM marked key, Uses: 10
+        "5efde6b4f5448336730dbd61", // Keycard with a blue marking, Uses: 1
+        "62987dfc402c7f69bf010923", // Shared bedroom marked key, Uses: 10
+        "6391fcf5744e45201147080f", // Primorsky Ave apartment key, Uses: 1
+        "6398fd8ad3de3849057f5128", // Backup hideout key, Uses: 1
+        "63a397d3af870e651d58e65b", // Car dealership closed section key, Uses: 1
+        "63a39e1d234195315d4020bd", // Primorsky 46-48 skybridge key, Uses: 1
+        "63a3a93f8a56922e82001f5d", // Abandoned factory marked key, Uses: 10
+        "64ccc25f95763a1ae376e447", // Mysterious room marked key, Uses: 10
+        "64ce572331dd890873175115", // Aspect company office key, Uses: 1
+        "64d4b23dc1b37504b41ac2b6", // Rusted bloody key, Uses: 1
+        "658199aa38c79576a2569e13", // TerraGroup science office key, Uses: 1
+        "6582dbf0b8d7830efc45016f", // Relaxation room key, Uses: 2
+        "664d3db6db5dea2bad286955", // Shatun's hideout key, Uses: 5
+        "664d3dd590294949fe2d81b7", // Grumpy's hideout key, Uses: 5
+        "664d3ddfdda2e85aca370d75", // Voron's hideout key, Uses: 5
+        "664d3de85f2355673b09aed5", // Leon's hideout key, Uses: 5
+        "664d4b0103ef2c61246afb56", // Dorm overseer key, Uses: 2
+        "66acd6702b17692df20144c0", // TerraGroup storage room keycard, Uses: 10
+        "6711039f9e648049e50b3307", // TerraGroup Labs residential unit keycard , Uses: 2
+        //"5e42c81886f7742a01529f57", // Object #11SR keycard, Uses: 10
+        //"5e42c83786f7742a021fdf3c", // Object #21WS keycard, Uses: 10
+        //"5c1d0c5f86f7744bb2683cf0", // TerraGroup Labs keycard (Blue), Uses: 10
+        //"5c1d0d6d86f7744bb2683e1f", // TerraGroup Labs keycard (Yellow), Uses: 10
+        //"5c1d0dc586f7744baf2e7b79", // TerraGroup Labs keycard (Green), Uses: 10
+        //"5c1d0efb86f7744baf2e7b7b", // TerraGroup Labs keycard (Red), Uses: 10
+        //"5c1d0f4986f7744bb01837fa", // TerraGroup Labs keycard (Black), Uses: 10
+        //"5c1e495a86f7743109743dfb", // TerraGroup Labs keycard (Violet), Uses: 10
     ],
 
-    "allowInSpecialSlots": true,
     "debug": {
         "log_missing_keys": false,
-        "log_rare_keys": true,
+        "log_rare_keys": false,
         "give_profile_all_keys": false,
         "force_remove_debug_items_on_start": false
     }
