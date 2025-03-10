@@ -276,6 +276,7 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
             item._props.ItemSound = caseConfig.sound;
         }
 
+        item._name = caseConfig.item_name;
         item._id = templateId;
         item._props.Prefab.path = itemPrefabPath;
 
@@ -465,38 +466,23 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
 
     createGrid(container, itemID, config) {
         const grids = [];
-        let cellHeight = config.InternalSize.vertical_cells;
-        let cellWidth = config.InternalSize.horizontal_cells;
-        const inFilt = this.replaceOldIdWithNewId(config.included_filter);
-        const exFilt = this.replaceOldIdWithNewId(config.excluded_filter);
-        const UCcellToApply = config.cell_to_apply_filters_to;
-        const UCinFilt = this.replaceOldIdWithNewId(config.unique_included_filter);
-        const UCexFilt = this.replaceOldIdWithNewId(config.unique_excluded_filter);
 
-        //if inFilt is empty set it to the base item id so the case will accept all items
-        if (inFilt.length === 1 && inFilt[0] === ""){
-            inFilt[0] = BaseClasses.ITEM;
-        }
-        if (UCinFilt.length === 1 && UCinFilt[0] === ""){
-            UCinFilt[0] = BaseClasses.ITEM;
-        }
+        // Loop over all grids in the config
+        for (let i = 0; i < config.Grids.length; i++) {
+            const grid = config.Grids[i];
+            const inFilt = this.replaceOldIdWithNewId(grid.included_filter ?? []);
+            const exFilt = this.replaceOldIdWithNewId(grid.excluded_filter ?? []);
+            const cellWidth = grid.width;
+            const cellHeight = grid.height;
 
-        //if num of width and height cells are not the same, set case to 1x1 and throw warning msg
-        if (cellHeight.length !== cellWidth.length){
-            cellHeight = [1];
-            cellWidth = [1];
-            this.logger.log(`[${this.modName}] : WARNING: number of internal and vertical cells must be the same.`, LogTextColor.RED);
-            this.logger.log(`[${this.modName}] : WARNING: setting ${config.item_name} to be 1 1x1 cell.`, LogTextColor.RED);
-
-        }
-
-        for (let i = 0; i < cellWidth.length; i++) {
-            if ((i === UCcellToApply-1) || (UCcellToApply[i] === "y" || UCcellToApply[i] === "Y")){
-                grids.push(this.generateGridColumn(container, itemID, `column${i}`, cellWidth[i], cellHeight[i], UCinFilt, UCexFilt));
-            } else {
-                grids.push(this.generateGridColumn(container, itemID, `column${i}`, cellWidth[i], cellHeight[i], inFilt, exFilt));
+            // If there's no include filter, add all items
+            if (inFilt.length === 0) {
+                inFilt.push(BaseClasses.ITEM);
             }
+
+            grids.push(this.generateGridColumn(container, itemID, `column${i}`, cellWidth, cellHeight, inFilt, exFilt));
         }
+
         return grids;
     }
 
@@ -594,59 +580,135 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
         // Look for any key cases in the user's inventory, and properly update the child key locations if we've moved them
         for (const caseName of Object.keys(cases))
         {
-            // Skip cases that aren't set slots
             const caseConfig = cases[caseName];
-            if (caseConfig.case_type !== "slots") continue;
-            const templateId = this.newIdMap[caseConfig.id];
 
-            // Get the template for the case
-            const caseTemplate = dbItems[templateId];
+            if (caseConfig.case_type === "slots" && !this.fixSlotCase(caseConfig, dbItems, pmcProfile)) {
+                pmcProfile.Inventory.items = pmcInventory;
+                return;
+            }
 
-            // Try to find the case in the user's profile
-            const inventoryCases = pmcProfile.Inventory.items.filter(x => x._tpl === templateId);
+            if (caseConfig.case_type === "container" && !this.fixContainerCase(caseConfig, dbItems, pmcProfile)) {
+                pmcProfile.Inventory.items = pmcInventory;
+                return;
+            }
+        }
+    }
 
-            for (const inventoryCase of inventoryCases)
+    fixSlotCase(caseConfig, dbItems, pmcProfile) {
+        const templateId = this.newIdMap[caseConfig.id];
+
+        // Get the template for the case
+        const caseTemplate = dbItems[templateId];
+
+        // Try to find the case in the user's profile
+        const inventoryCases = pmcProfile.Inventory.items.filter(x => x._tpl === templateId);
+
+        for (const inventoryCase of inventoryCases)
+        {
+            const caseChildren = pmcProfile.Inventory.items.filter(x => x.parentId === inventoryCase._id);
+
+            for (const child of caseChildren)
             {
-                const caseChildren = pmcProfile.Inventory.items.filter(x => x.parentId === inventoryCase._id);
-
-                for (const child of caseChildren)
+                // Skip if the current slot filter can hold the given item, and there aren't multiple items in it
+                const currentSlot = caseTemplate._props?.Slots?.find(x => x._name === child.slotId);
+                if (currentSlot._props?.filters[0]?.Filter[0] === child._tpl &&
+                    // A release of GKS went out that may have stacked keycards, so check for any stacked items in one slot
+                    caseChildren.filter(x => x.slotId === currentSlot._name).length === 1
+                )
                 {
-                    // Skip if the current slot filter can hold the given item, and there aren't multiple items in it
-                    const currentSlot = caseTemplate._props?.Slots?.find(x => x._name === child.slotId);
-                    if (currentSlot._props?.filters[0]?.Filter[0] === child._tpl &&
-                        // A release of GKS went out that may have stacked keycards, so check for any stacked items in one slot
-                        caseChildren.filter(x => x.slotId === currentSlot._name).length === 1
+                    continue;
+                }
+
+                // Find a new slot, if this is a labs access item, find the first empty compatible slot
+                const newSlot = caseTemplate._props?.Slots?.find(x => 
+                    x._props?.filters[0]?.Filter[0] === child._tpl &&
+                    // A release of GKS went out that may have stacked keycards, try to fix that
+                    (
+                        child._tpl !== ItemTpl.KEYCARD_TERRAGROUP_LABS_ACCESS || 
+                        !caseChildren.find(y => y.slotId === x._name)
                     )
-                    {
-                        continue;
-                    }
+                );
 
-                    // Find a new slot, if this is a labs access item, find the first empty compatible slot
-                    const newSlot = caseTemplate._props?.Slots?.find(x => 
-                        x._props?.filters[0]?.Filter[0] === child._tpl &&
-                        // A release of GKS went out that may have stacked keycards, try to fix that
-                        (
-                            child._tpl !== ItemTpl.KEYCARD_TERRAGROUP_LABS_ACCESS || 
-                            !caseChildren.find(y => y.slotId === x._name)
-                        )
-                    );
+                // If we couldn't find a new slot for this key, something has gone horribly wrong, restore the inventory and exit
+                if (!newSlot)
+                {
+                    this.logger.error(`[${this.modName}] : ERROR: Unable to find new slot for ${child._tpl}. Restoring inventory and exiting`);
+                    return false;
+                }
 
-                    // If we couldn't find a new slot for this key, something has gone horribly wrong, restore the inventory and exit
-                    if (!newSlot)
-                    {
-                        this.logger.error(`[${this.modName}] : ERROR: Unable to find new slot for ${child._tpl}. Restoring inventory and exiting`);
-                        pmcProfile.Inventory.items = pmcInventory;
-                        return;
-                    }
-
-                    if (newSlot._name !== child.slotId)
-                    {
-                        this.logger.debug(`[${this.modName}] : Need to move ${child.slotId} to ${newSlot._name}`);
-                        child.slotId = newSlot._name;
-                    }
+                if (newSlot._name !== child.slotId)
+                {
+                    this.logger.debug(`[${this.modName}] : Need to move ${child.slotId} to ${newSlot._name}`);
+                    child.slotId = newSlot._name;
                 }
             }
         }
+
+        return true;
+    }
+
+    fixContainerCase(caseConfig, dbItems, pmcProfile) {
+        const templateId = this.newIdMap[caseConfig.id];
+
+        // Get the template for the case
+        const caseTemplate = dbItems[templateId];
+
+        // Try to find the case in the user's profile
+        const inventoryCases = pmcProfile.Inventory.items.filter(x => x._tpl === templateId);
+
+        for (const inventoryCase of inventoryCases)
+        {
+            const caseChildren = pmcProfile.Inventory.items.filter(x => x.parentId === inventoryCase._id);
+
+            for (const child of caseChildren)
+            {
+                // Skip if the item already has a location property
+                if (child.location) {
+                    continue;
+                }
+
+                // Find which grid the item should be in
+                const newGrid = caseTemplate._props?.Grids?.find(x => 
+                    x._props?.filters[0]?.Filter?.includes(child._tpl)
+                );
+
+                if (!newGrid) {
+                    this.logger.error(`[${this.modName}] : ERROR: Unable to find new grid for ${child._tpl}. Restoring inventory and exiting`);
+                    return false;
+                }
+
+                // Find the first free slot in that grid, assume everything is a 1x1 item
+                let newX = -1;
+                let newY = -1;
+                for (let y = 0; y < newGrid._props.cellsV && newY < 0; y++)
+                {
+                    for (let x = 0; x < newGrid._props.cellsH && newX < 0; x++)
+                    {
+                        if (!caseChildren.find(item => item.location?.x == x && item.location?.y == y)) {
+                            newX = x;
+                            newY = y;
+                        }
+                    }
+                }
+
+                if (newX == -1 || newY == -1) {
+                    this.logger.error(`[${this.modName}] : ERROR: Unable to find new location for ${child._tpl}. Restoring inventory and exiting`);
+                    return false;
+                }
+
+                this.logger.debug(`[${this.modName}] : Need to move ${child.slotId} to ${newGrid._name} X: ${newX} Y: ${newY}`);
+
+                // Update the child item to the new location
+                child.location = {
+                    "x": newX,
+                    "y": newY,
+                    "r": "Horizontal"
+                };
+                child.slotId = newGrid._name;
+            }
+        }
+
+        return true;
     }
 }
 

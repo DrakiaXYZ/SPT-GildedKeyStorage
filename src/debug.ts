@@ -9,7 +9,8 @@ import type { ItemHelper } from "@spt/helpers/ItemHelper";
 import * as cases from "../config/cases.json";
 
 const keysInConfig:Array<string> = [
-    ...cases["Golden Keycard Case"].slot_ids,
+    ...cases["Golden Keycard Case"].Grids[0].included_filter,
+    ...cases["Golden Keycard Case"].Grids[1].included_filter,
     ...cases["Golden Keychain Mk. I"].slot_ids,
     ...cases["Golden Keychain Mk. II"].slot_ids,
     ...cases["Golden Keychain Mk. III"].slot_ids
