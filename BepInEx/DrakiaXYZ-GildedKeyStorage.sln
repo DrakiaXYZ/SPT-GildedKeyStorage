@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrakiaXYZ-GildedKeyStorage", "DrakiaXYZ-GildedKeyStorage.csproj", "{9D55B2B1-22D3-4963-9EAC-9170B4B2FFCB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9D55B2B1-22D3-4963-9EAC-9170B4B2FFCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D55B2B1-22D3-4963-9EAC-9170B4B2FFCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D55B2B1-22D3-4963-9EAC-9170B4B2FFCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D55B2B1-22D3-4963-9EAC-9170B4B2FFCB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A247FC6D-77DA-4BB5-B19C-09B00B251B10}
+	EndGlobalSection
+EndGlobal

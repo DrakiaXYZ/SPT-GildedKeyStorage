@@ -367,7 +367,7 @@
     },
 
     "Golden Keycard Case": {
-        "case_type": "container",
+        "case_type": "slots",
 
         "id": "Golden_Keycard_Case",
         "item_name": "Golden Keycard Holder",
@@ -405,41 +405,28 @@
         "allow_in_backpacks": true,
         "case_allowed_in": [],
         "case_disallowed_in": [],
-
-        "Grids": [
-            {
-                "width": 2,
-                "height": 6,
-                "included_filter": [
-                    "5c1d0f4986f7744bb01837fa",
-                    "5c1d0c5f86f7744bb2683cf0",
-                    "5c1d0dc586f7744baf2e7b79",
-                    "5c1d0d6d86f7744bb2683e1f",
-                    "5efde6b4f5448336730dbd61",
-                    "5c1e495a86f7743109743dfb",
-                    "5e42c81886f7742a01529f57",
-                    "5e42c83786f7742a021fdf3c",
-                    "5c1d0efb86f7744baf2e7b7b",
-                    "66acd6702b17692df20144c0",
-                    "6711039f9e648049e50b3307"
-                ]
-            },
-            {
-                "width": 2,
-                "height": 5,
-                "included_filter": [
-                    "5c94bbff86f7747ee735c08f",
-                    "5c94bbff86f7747ee735c08f",
-                    "5c94bbff86f7747ee735c08f",
-                    "5c94bbff86f7747ee735c08f",
-                    "5c94bbff86f7747ee735c08f",
-                    "5c94bbff86f7747ee735c08f",
-                    "5c94bbff86f7747ee735c08f",
-                    "5c94bbff86f7747ee735c08f",
-                    "5c94bbff86f7747ee735c08f",
-                    "5c94bbff86f7747ee735c08f"
-                ]
-            }
+        
+        "slot_ids": [    
+            "5c1d0f4986f7744bb01837fa",
+            "5c1d0c5f86f7744bb2683cf0",
+            "5c1d0dc586f7744baf2e7b79",
+            "5c1d0d6d86f7744bb2683e1f",
+            "5efde6b4f5448336730dbd61",
+            "5c1e495a86f7743109743dfb",
+            "5e42c81886f7742a01529f57",
+            "5e42c83786f7742a021fdf3c",
+            "5c1d0efb86f7744baf2e7b7b",
+            "66acd6702b17692df20144c0",
+            "6711039f9e648049e50b3307",
+            "5c94bbff86f7747ee735c08f",
+            "5c94bbff86f7747ee735c08f",
+            "5c94bbff86f7747ee735c08f",
+            "5c94bbff86f7747ee735c08f",
+            "5c94bbff86f7747ee735c08f",
+            "5c94bbff86f7747ee735c08f",
+            "5c94bbff86f7747ee735c08f",
+            "5c94bbff86f7747ee735c08f",
+            "5c94bbff86f7747ee735c08f"
         ]
     }
 }

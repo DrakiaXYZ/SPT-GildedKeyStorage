@@ -87,7 +87,7 @@ async function main() {
     const currentDir = getCurrentDirectory();
 
     // Defining at this scope because we need to use it in the finally block.
-    let projectDir;
+    let tempDir, projectDir, bepinexDir;
 
     try {
         // Load the .buildignore file to set up an ignore handler for the build process.
@@ -106,30 +106,37 @@ async function main() {
         logger.log("info", "Distribution directory successfully cleaned.");
 
         // Create a temporary working directory to perform the build operations.
-        projectDir = await createTemporaryDirectoryWithProjectName(projectName);
+        [tempDir, projectDir, bepinexDir] = await createTemporaryDirectoryWithProjectName(projectName);
         logger.log("success", "Temporary working directory successfully created.");
-        logger.log("info", projectDir);
+        logger.log("info", tempDir);
 
         // Copy files to the temporary directory while respecting the .buildignore rules.
         logger.log("info", "Beginning copy operation using .buildignore file...");
         await copyFiles(currentDir, projectDir, buildIgnorePatterns);
         logger.log("success", "Files successfully copied to temporary directory.");
 
+        // Copy bepinex plugin to temporary path
+        logger.log("info", "Beginning copy of BepInEx plugin...");
+        const dllPath = path.join("BepInEx", "bin", "Release", "DrakiaXYZ-GildedKeyStorage.dll");
+        const bepinexDllPath = path.join(bepinexDir, "DrakiaXYZ-GildedKeyStorage.dll");
+        await fs.copyFile(dllPath, bepinexDllPath);
+        logger.log("success", "BepInEx plugin copied to temporary directory.");
+
         // Create a zip archive of the project files.
         logger.log("info", "Beginning folder compression...");
-        const zipFilePath = path.join(path.dirname(projectDir), `${projectZip}.zip`);
-        await createZipFile(projectDir, zipFilePath, "user/mods/" + projectName);
+        const zipFilePath = path.join(path.dirname(tempDir), `${projectZip}.zip`);
+        await createZipFile(tempDir, zipFilePath, "");
         logger.log("success", "Archive successfully created.");
         logger.log("info", zipFilePath);
 
         // Move the zip file inside of the project directory, within the temporary working directory.
-        const zipFileInProjectDir = path.join(projectDir, `${projectZip}.zip`);
+        const zipFileInProjectDir = path.join(tempDir, `${projectZip}.zip`);
         await fs.move(zipFilePath, zipFileInProjectDir);
         logger.log("success", "Archive successfully moved.");
         logger.log("info", zipFileInProjectDir);
 
         // Move the temporary directory into the distribution directory.
-        await fs.move(projectDir, distDir);
+        await fs.move(tempDir, distDir);
         logger.log("success", "Temporary directory successfully moved into project distribution directory.");
 
         // Log the success message. Write out the path to the mod package.
@@ -267,10 +274,12 @@ async function createTemporaryDirectoryWithProjectName(projectName) {
     const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "spt-mod-build-"));
 
     // Create a subdirectory within the temporary directory using the project name for this specific build.
-    const projectDir = path.join(tempDir, projectName);
+    const projectDir = path.join(tempDir, 'user', 'mods', projectName);
     await fs.ensureDir(projectDir);
+    const bepinexDir = path.join(tempDir, 'BepInEx', 'plugins');
+    await fs.ensureDir(bepinexDir);
 
-    return projectDir;
+    return [tempDir, projectDir, bepinexDir];
 }
 
 /**
