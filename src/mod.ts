@@ -256,8 +256,8 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
     createCase(container, caseConfig, tables){
         const handbook = tables.templates.handbook;
         const locales = Object.values(tables.locales.global) as Record<string, string>[];
-        const itemID = caseConfig.id
-        const itemPrefabPath = `CaseBundles/${itemID}.bundle`
+        const itemID: string = caseConfig.id;
+        const itemPrefabPath = `CaseBundles/${itemID.toLocaleLowerCase()}.bundle`
         const templateId = this.newIdMap[itemID];
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         let item: any;
