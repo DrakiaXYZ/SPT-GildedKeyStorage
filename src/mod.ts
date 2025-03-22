@@ -373,26 +373,26 @@ class Mod implements IPostDBLoadMod, IPreSptLoadMod {
             if (item._type !== "Item") continue;
             
             //disallow in backpacks
-            if (!this.config.allow_in_backpacks){
+            if (!this.config.allow_cases_in_backpacks){
                 this.allowOrDisallowIntoCaseByParent(itemID, "exclude", item, BaseClasses.BACKPACK);
             }
 
             //allow in secure containers
-            if (this.config.allow_in_secure_containers){
+            if (this.config.allow_cases_in_secure){
                 this.allowOrDisallowIntoCaseByParent(itemID, "include", item, BaseClasses.MOB_CONTAINER);
             }
 
             //disallow in additional specific items
-            for (const configItem in this.config.case_disallowed_in){
-                if (this.config.case_disallowed_in[configItem] === item._id){
+            for (const configItem in this.config.cases_disallowed_in){
+                if (this.config.cases_disallowed_in[configItem] === item._id){
                     this.allowOrDisallowIntoCaseByID(itemID, "exclude", item);
                 }
 
             }
 
             //allow in additional specific items
-            for (const configItem in this.config.case_allowed_in){
-                if (this.config.case_allowed_in[configItem] === item._id){
+            for (const configItem in this.config.cases_allowed_in){
+                if (this.config.cases_allowed_in[configItem] === item._id){
                     this.allowOrDisallowIntoCaseByID(itemID, "include", item);
                 }
             }

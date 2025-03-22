@@ -7,6 +7,10 @@
     "keys_are_discardable": true,
     "all_keys_in_secure": true,
     "allow_cases_in_special": false,
+    "allow_cases_in_secure": true,
+    "allow_cases_in_backpacks": true,
+    "cases_allowed_in": [],
+    "cases_disallowed_in": [],
     "use_finite_keys_list": false,
     "finite_keys_list":[
         "5780cf7f2459777de4559322", // Dorm room 314 marked key, Uses: 10

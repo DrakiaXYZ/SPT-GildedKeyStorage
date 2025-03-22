@@ -5,16 +5,18 @@ using SPT.Reflection.Patching;
 using System.Reflection;
 using HarmonyLib;
 using System.Linq;
+using EFT.UI.DragAndDrop;
 
 namespace DrakiaXYZ.GildedKeyStorage
 {
-    [BepInPlugin("xyz.drakia.gildedkeystorage", "DrakiaXYZ-GildedKeyStorage", "1.6.0")]
+    [BepInPlugin("xyz.drakia.gildedkeystorage", "DrakiaXYZ-GildedKeyStorage", "1.6.2")]
     [BepInDependency("com.SPT.core", "3.11.0")]
     public class GildedKeyStoragePlugin : BaseUnityPlugin
     {
         public void Awake()
         {
             new RemoveSlotItemsForMapEntryPatch().Enable();
+            new HideSpecialSlotGrids().Enable();
         }
     }
 
@@ -83,6 +85,26 @@ namespace DrakiaXYZ.GildedKeyStorage
 
             // Skip original
             return false;
+        }
+    }
+
+    public class HideSpecialSlotGrids : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.DeclaredMethod(typeof(GeneratedGridsView), nameof(GeneratedGridsView.Show));
+        }
+
+        [PatchPrefix]
+        private static bool PatchPrefix(GeneratedGridsView __instance, CompoundItem compoundItem)
+        {
+            // The item is in the special slot, and we're drawing the inventory UI based on the parent, skip showing the grids
+            if (compoundItem.CurrentAddress.IsSpecialSlotAddress() && __instance.transform.parent.name.StartsWith("SpecialSlot"))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

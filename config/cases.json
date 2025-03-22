@@ -53,12 +53,7 @@
                 "height": 5,
                 "included_filter": ["543be5e94bdc2df1348b4568"]
             }
-        ],
-
-        "allow_in_secure_containers": true,
-        "allow_in_backpacks": true,
-        "case_allowed_in": [],
-        "case_disallowed_in": []
+        ]
     },
 
     "Golden Keychain Mk. I": {
@@ -95,12 +90,6 @@
             "width": 1,
             "height": 1
         },
-
-        "allow_in_secure_containers": true,
-        "allow_in_backpacks": true,
-        "case_allowed_in": [],
-        "case_disallowed_in": [],
-
 
         "slot_ids": [
             "658199aa38c79576a2569e13",
@@ -208,12 +197,6 @@
             "height": 1
         },
 
-        "allow_in_secure_containers": true,
-        "allow_in_backpacks": true,
-        "case_allowed_in": [],
-        "case_disallowed_in": [],
-
-
         "slot_ids": [
             "61a64428a8c6aa1b795f0ba1",
             "61a6444b8c141d68246e2d2f",
@@ -315,11 +298,6 @@
             "height": 1
         },
 
-        "allow_in_secure_containers": true,
-        "allow_in_backpacks": true,
-        "case_allowed_in": [],
-        "case_disallowed_in": [],
-
         "slot_ids": [
             "6398fd8ad3de3849057f5128",            "63a39667c9b3aa4b61683e98",
             "63a397d3af870e651d58e65b",            "63a399193901f439517cafb6",
@@ -401,11 +379,6 @@
             "height": 1
         },
 
-        "allow_in_secure_containers": true,
-        "allow_in_backpacks": true,
-        "case_allowed_in": [],
-        "case_disallowed_in": [],
-        
         "slot_ids": [    
             "5c1d0f4986f7744bb01837fa",
             "5c1d0c5f86f7744bb2683cf0",
